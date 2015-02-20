@@ -1,0 +1,17 @@
+.fw-nav-menu-switcher-wrapper{
+	float:left;
+	line-height:23px;
+	margin:4px  1px;
+}
+.fw-nav-menu-switcher-wrapper a{
+	float: right;
+	margin: 0px 2px !important;
+	padding-left: 3px !important;
+}
+.fw-nav-menu-switcher-wrapper a span {
+	font-size:15px;
+	text-decoration:none;
+	line-height:inherit;
+	vertical-align: middle;
+	height:auto;
+}

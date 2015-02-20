@@ -1,0 +1,34 @@
+#wpadminbar #wp-admin-bar-fw_language_switcher .ab-item img{
+	margin: 0 8px 0 2px;
+}
+
+/* language columns in edit.php and edit-tags.php */
+th[class*='column-fw_lang_'], td[class*='column-fw_lang_'] {
+	width: 2em;
+	text-align: center;
+}
+/* fw-selectize style */
+
+.fw-tt .selectize-input {
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+	padding: 4px !important;
+}
+.fw-tt .selectize-input.has-items{
+	padding: 4px 4px 0px 8px !important;
+}
+.fw-tt .selectize-dropdown-header{
+	-webkit-border-radius: 0px;
+	-moz-border-radius: 0px;
+	border-radius: 0px;
+}
+.fw-tt .selectize-input .item{
+	line-height: 18px;
+
+	margin: 0px 4px 4px 0px  !important;
+
+}
+.fw-tt.selectize-control.single .selectize-input:after{
+	margin-top: -2px;
+}
