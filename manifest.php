@@ -10,3 +10,4 @@ $manifest['description'] = __( 'This extension translate your blog', 'fw' );
 $manifest['version'] = '1.0.0';
 
 $manifest['display'] = true;
+$manifest['standalone'] = true;
