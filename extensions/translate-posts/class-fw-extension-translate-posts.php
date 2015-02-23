@@ -65,14 +65,6 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	}
 
 	/**
-	 * Get enabled post_types from db.
-	 * @return mixed|null
-	 */
-	public function get_db_settings_post_types() {
-		return fw_get_db_ext_settings_option( $this->get_parent()->get_name(), 'post-types', $this->get_parent()->get_default_value_from_settings( 'post-types' ) );
-	}
-
-	/**
 	 * Get filtered post types.
 	 *
 	 * @return array
@@ -83,9 +75,6 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		if ( empty( $filtered_post_types ) ) {
 			$wp_post_types       = get_post_types( array( 'public' => true, '_builtin' => true ) );
 			$custom_post_types   = get_post_types( array( 'public' => true, '_builtin' => false ) );
-			//In case if it will filtered from settings checkboxes.
-//			$settings_post_types = (array) $this->get_db_settings_post_types();
-//			$intersected = array_intersect_key( $settings_post_types, $custom_post_types );
 			$filtered_post_types = array_merge( $wp_post_types, $custom_post_types );
 		}
 
@@ -336,17 +325,6 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		);
 
 		return $options;
-	}
-
-	/**
-	 * Verify is exists publish posts.
-	 *
-	 * @param $post_type
-	 *
-	 * @return bool
-	 */
-	private function have_publish_posts( $post_type ) {
-		return (bool) wp_count_posts( $post_type )->publish > 0;
 	}
 
 	/**

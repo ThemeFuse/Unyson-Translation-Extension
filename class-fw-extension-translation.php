@@ -416,7 +416,7 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @return array
 	 */
 	public function get_translated_languages_codes() {
-		return (array) fw_get_db_ext_settings_option( $this->get_name(), 'translate-to', $this->get_default_value_from_settings( 'translate-to' ) );
+		return (array) fw_get_db_ext_settings_option( $this->get_name(), 'translate-to' );
 	}
 
 	public function get_enabled_custom_post_types() {
@@ -438,20 +438,7 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @return mixed|null
 	 */
 	public function get_default_language_code() {
-		return fw_get_db_ext_settings_option( $this->get_name(), 'default-language', $this->get_default_value_from_settings( 'default-language' ) );
-	}
-
-	/**
-	 * Get default value from settings.
-	 *
-	 * @param $key
-	 *
-	 * @return mixed
-	 */
-	public function get_default_value_from_settings( $key ) {
-		$default_values = fw_get_options_values_from_input( $this->get_settings_options() );
-
-		return $default_values[ $key ];
+		return fw_get_db_ext_settings_option( $this->get_name(), 'default-language' );
 	}
 
 	/**
@@ -465,7 +452,7 @@ class FW_Extension_Translation extends FW_Extension {
 
 	public function convert_data_to_default_language() {
 
-		$convert = fw_get_db_ext_settings_option( $this->get_name(), 'convert', $this->get_default_value_from_settings( 'convert' ) );
+		$convert = fw_get_db_ext_settings_option( $this->get_name(), 'convert' );
 
 		if ( $convert ) {
 			$this->get_child( 'translate-terms' )->convert_terms_to_default_language();
