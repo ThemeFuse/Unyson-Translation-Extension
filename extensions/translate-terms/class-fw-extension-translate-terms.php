@@ -201,7 +201,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 */
 	public function is_public_tax_type() {
 
-		$tax_type = FW_Request::GET( 'taxonomy', FW_Request::POST('taxonomy') );
+		$tax_type = FW_Request::GET( 'taxonomy', FW_Request::POST( 'taxonomy' ) );
 
 		return in_array( $tax_type, $this->get_filtered_tax_types() );
 	}
@@ -214,8 +214,8 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	private function get_filtered_tax_types() {
 		static $filtered_tax_types = array();
 		if ( empty( $filtered_tax_types ) ) {
-			$wp_tax_types       = get_taxonomies( array( 'public' => true, '_builtin' => true ) );
-			$custom_tax_types   = get_taxonomies( array( 'public' => true, '_builtin' => false ) );
+			$wp_tax_types     = get_taxonomies( array( 'public' => true, '_builtin' => true ) );
+			$custom_tax_types = get_taxonomies( array( 'public' => true, '_builtin' => false ) );
 			//In case if it will filtered from settings checkboxes.
 //			$settings_tax_types = (array) $this->get_db_settings_tax_types();
 //			$intersected = array_intersect_key( $settings_tax_types, $custom_tax_types );
@@ -371,9 +371,9 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 */
 	function generate_term_column( $columns ) {
 
-		if (  $this->is_public_tax_type() ) {
+		if ( $this->is_public_tax_type() ) {
 
-			$languages = is_null( FW_Request::GET( 'fw_all_languages', FW_Request::POST('fw_options/fw_all_languages') ) ) ?
+			$languages = is_null( FW_Request::GET( 'fw_all_languages', FW_Request::POST( 'fw_options/fw_all_languages' ) ) ) ?
 				$this->get_parent()->get_enabled_languages_without( $this->get_parent()->get_admin_active_language() ) :
 				$this->get_parent()->get_enabled_languages();
 			$collector = array();
@@ -511,10 +511,12 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	public function get_post_types_taxonomies() {
 		$collector = array();
 
-		$wp_post_types       = get_post_types( array( 'public' => true, '_builtin' => true ) );
-		$custom_post_types   = get_post_types( array( 'public' => true, '_builtin' => false ) );
-		$settings_post_types = (array) fw_ext('translate-posts')->get_db_settings_post_types();
-		$filtered_post_types = array_merge( $wp_post_types, array_intersect_key( $settings_post_types, $custom_post_types ) );
+		$wp_post_types     = get_post_types( array( 'public' => true, '_builtin' => true ) );
+		$custom_post_types = get_post_types( array( 'public' => true, '_builtin' => false ) );
+		//Uncoment and change $custom_post_types with $interesected_post_types in array_merge in order to filter from setting checkboxes
+		//$settings_post_types = (array) fw_ext('translate-posts')->get_db_settings_post_types();
+		//$intersected_post_types = array_intersect_key( $settings_post_types, $custom_post_types )
+		$filtered_post_types = array_merge( $wp_post_types, $custom_post_types );
 
 
 		foreach ( $filtered_post_types as $key => $post_type ) {
