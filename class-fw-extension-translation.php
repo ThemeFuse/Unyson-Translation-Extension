@@ -39,7 +39,6 @@ class FW_Extension_Translation extends FW_Extension {
 		add_rewrite_endpoint( 'fw_lang', EP_ALL );
 
 		add_action( 'init', array( $this, 'set_admin_active_language' ), 0 );
-		add_action( 'wp_footer', array( $this, 'frontend_language_switcher' ) );
 		add_action( 'parse_query', array( $this, 'set_active_cookie' ) );
 
 		add_filter( 'option_page_on_front', array( $this, 'translate_home_page' ) );
