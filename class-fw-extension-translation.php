@@ -390,9 +390,14 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @param $frontend_urls
 	 */
 	public function render_frontend_switch_urls( $frontend_urls ) {
+
+		$str = '<ul>';
 		foreach ( $frontend_urls as $lang_code => $link ) {
-			echo '<a href="' . $link . '" class="button"><img src="' . fw_ext_translation_get_flag( $lang_code ) . '">&nbsp;&nbsp;' . fw_ext_translation_get_language_name( $lang_code ) . '</a>';
+			$str.= '<li><a href="' . $link . '"><img src="' . fw_ext_translation_get_flag( $lang_code ) . '">&nbsp;&nbsp;' . fw_ext_translation_get_language_name( $lang_code ) . '</a></li>';
 		}
+		$str .= '</ul>';
+
+		echo apply_filters('fw_ext_translation_change_render_language_switcher', $str, $frontend_urls);
 	}
 
 	/**
