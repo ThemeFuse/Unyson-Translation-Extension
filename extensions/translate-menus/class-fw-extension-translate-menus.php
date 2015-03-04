@@ -243,7 +243,7 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 				JOIN  $wpdb->fw_termmeta as t2 ON
 				t1.fw_term_id = t2.fw_term_id AND
 				t2.meta_key='translation_lang'
-            WHERE t1.meta_key='translation_id'
+			WHERE t1.meta_key='translation_id'
 			AND t1.meta_value=%d and t2.meta_value=%s";
 
 		return (array) $wpdb->get_row( $wpdb->prepare( $sql, $translation_id, $lang ), ARRAY_A );
@@ -267,7 +267,7 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 				JOIN  $wpdb->fw_termmeta as t2 ON
 				t1.fw_term_id = t2.fw_term_id AND
 				t2.meta_key='translation_lang'
-            WHERE t1.meta_key='translation_id'
+			WHERE t1.meta_key='translation_id'
 			AND t1.meta_value=%d";
 
 		return $wpdb->get_results( $wpdb->prepare( $sql, $translation_id ), ARRAY_A );

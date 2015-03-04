@@ -175,8 +175,8 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	public function filter_posts_where( $where ) {
 		global $pagenow, $wpdb;
 		if ( 'edit.php' === $pagenow &&
-		     ! is_null( FW_Request::get( 'fw_all_languages' ) ) &&
-		     $this->is_public_post_type()
+			 ! is_null( FW_Request::get( 'fw_all_languages' ) ) &&
+			 $this->is_public_post_type()
 		) {
 			$where .= " AND $wpdb->postmeta.meta_value IN ( '" . implode( "','", array_keys( $this->get_parent()->get_enabled_languages() ) ) . "' )";
 		}
@@ -265,9 +265,9 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 				JOIN  $wpdb->postmeta as t2 ON
 				t1.post_id = t2.post_id AND
 				t2.meta_key='translation_lang'
-                JOIN $wpdb->posts as p ON
-                t2.post_id = p.ID
-                AND p.post_status = 'publish'
+				JOIN $wpdb->posts as p ON
+				t2.post_id = p.ID
+				AND p.post_status = 'publish'
 			WHERE t1.meta_key='translation_id'
 			AND t1.meta_value <> ''
 			AND t1.meta_value=%d";
