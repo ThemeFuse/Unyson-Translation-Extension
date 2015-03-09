@@ -181,4 +181,15 @@ class FW_Language {
 		return $this->languages[$code]['locale'];
 	}
 
+	/**
+	 * Get language from locale.
+	 * @param $locale
+	 *
+	 * @return string
+	 */
+	public function get_language_from_locale($locale){
+		$keys = array_keys(wp_list_pluck($this->languages, 'locale'), $locale);
+		return empty($keys)? '' : $keys[0];
+	}
+
 }

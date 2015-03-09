@@ -20,12 +20,18 @@ class FW_Extension_Translation extends FW_Extension {
 	 */
 	public $languages_list;
 
+	public $lang_tag = 'fw_lang';
+
 	/**
 	 * Called after all extensions instances was created
 	 * @internal
 	 */
 	protected function _init() {
 		$this->languages_list = new FW_Language();
+
+		add_action( 'shutdown', array($this, 'enable_flush_rules') );
+		add_action( 'fw_extensions_after_activation', array($this , 'set_flush_rules_option') );
+		add_action( 'fw_extensions_before_deactivation', array($this, 'disable_flush_rules') );
 
 		if ( is_admin() ) {
 			$this->add_admin_actions();
@@ -36,16 +42,170 @@ class FW_Extension_Translation extends FW_Extension {
 			register_widget( 'FW_Widget_Language_Switcher' );
 		} );
 
-		add_rewrite_endpoint( 'fw_lang', EP_ALL );
+		// rewrite rules add language parameter.
+		add_filter( 'rewrite_rules_array', array( $this, 'change_rewrite_rules' ) ); // needed for post type archives
 
-		add_action('fw_ext_translation_render_language_switcher', array($this, 'frontend_language_switcher'));
+
+		add_action( 'fw_ext_translation_render_language_switcher', array( $this, 'frontend_language_switcher' ) );
 		add_action( 'init', array( $this, 'set_admin_active_language' ), 0 );
-		add_action( 'parse_query', array( $this, 'set_active_cookie' ) );
+		add_filter( 'query_vars', array( $this, 'add_custom_query_var' ), 0 );
+		add_action( 'parse_query', array( $this, 'set_active_cookie' ), 20 );
+		add_action( 'parse_query', array( $this, 'parse_query' ), 10, 1 );
 
 		add_filter( 'option_page_on_front', array( $this, 'translate_home_page' ) );
 		add_filter( 'option_page_for_posts', array( $this, 'translate_home_page' ) );
-
 		add_filter( 'pre_get_posts', array( $this, 'filter_homepage_query' ) );
+		add_filter( 'home_url', array($this, 'filter_home_url'), 10, 3 );
+
+	}
+
+	/**
+	 * Filter home url.
+	 *
+	 * @param $url
+	 * @param $path
+	 * @param $schema
+	 *
+	 * @return mixed|string
+	 */
+	public function filter_home_url( $url, $path, $schema ) {
+		$active_lang = $this->get_frontend_active_language();
+
+		if ( is_admin() || ! did_action( 'template_redirect' ) || did_action( 'login_init' ) ) {
+			return $url;
+		}
+
+		global $wp_rewrite;
+		if ( $wp_rewrite->using_permalinks() ) {
+			if ( $path && is_string( $path ) && '/' != $path ) {
+				$url = str_replace( $path, '', $url );
+				$url = untrailingslashit( $url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $active_lang . '/' . ltrim( $path, '/' ) );
+			} else {
+				$url = untrailingslashit( $url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $active_lang );
+			}
+		} else {
+			$url = add_query_arg( array( $this->lang_tag => $active_lang ), $url );
+		}
+
+		return $url;
+	}
+
+	public function set_flush_rules_option( $extensions ) {
+		if ( in_array( $this->get_name(), array_keys( $extensions ) ) ) {
+			fw_set_db_ext_settings_option( $this->get_name(), 'flush_rules_enabled', false );
+		}
+	}
+
+	/**
+	 * Enable flush_rules.
+	 */
+	public function enable_flush_rules() {
+		$flush_rules = (bool) fw_get_db_ext_settings_option( $this->get_name(), 'flush_rules_enabled' );
+		if ( $flush_rules === false ) {
+			flush_rewrite_rules();
+			fw_set_db_ext_settings_option( $this->get_name(), 'flush_rules_enabled', true );
+
+		}
+	}
+
+	/**
+	 * Disable flush_rules.
+	 *
+	 * @param $extensions
+	 */
+	public function disable_flush_rules( $extensions ) {
+		if ( in_array( $this->get_name(), array_keys( $extensions ) ) ) {
+			remove_filter( 'rewrite_rules_array', array( $this, 'change_rewrite_rules' ) );
+			flush_rewrite_rules();
+		}
+	}
+
+	/**
+	 * Add lang query var.
+	 *
+	 * @param $vars
+	 *
+	 * @return array
+	 */
+	function add_custom_query_var( $vars ) {
+		$vars[] = $this->lang_tag;
+
+		return $vars;
+	}
+
+	/**
+	 * Function that resolve WordPress bug with frontpage,
+	 * see this link https://core.trac.wordpress.org/ticket/23867
+	 *
+	 * @param $query
+	 */
+	public function parse_query( $query ) {
+		$qv =& $query->query_vars;
+
+		if ( $query->is_home && 'page' == get_option( 'show_on_front' ) && get_option( 'page_on_front' ) ) {
+			$_query = wp_parse_args( $query->query );
+			// pagename can be set and empty depending on matched rewrite rules. Ignore an empty pagename.
+			if ( isset( $_query['pagename'] ) && '' == $_query['pagename'] ) {
+				unset( $_query['pagename'] );
+			}
+
+			// this is where will break from core wordpress
+			$ignore = array( 'preview', 'page', 'paged', 'cpage' );
+
+			$ignore[] = $this->lang_tag;
+
+			if ( empty( $_query ) || ! array_diff( array_keys( $_query ), $ignore ) ) {
+				$query->is_page = true;
+				$query->is_home = false;
+
+				$qv['page_id'] = get_option( 'page_on_front' );
+				// Correct <!--nextpage--> for page_on_front
+				if ( ! empty( $qv['paged'] ) ) {
+					$qv['page'] = $qv['paged'];
+					unset( $qv['paged'] );
+				}
+			}
+		}
+
+		// reset the is_singular flag after our updated code above
+		$query->is_singular = $query->is_single || $query->is_page || $query->is_attachment;
+	}
+
+	/**
+	 * Function that change rewrite rules for correct working with languages.
+	 *
+	 * @param $rules
+	 *
+	 * @return array
+	 */
+	public function change_rewrite_rules( $rules ) {
+		$collector = array();
+
+		global $wp_rewrite;
+		$enabled_language_string = implode( '|', array_keys( $this->get_enabled_languages() ) );
+
+		foreach ( $rules as $key => $rule ) {
+			$collector[ $this->lang_tag . '/(' . $enabled_language_string . ')/' . str_replace( $wp_rewrite->root, '', $key ) ] = str_replace(
+				array( '[8]', '[7]', '[6]', '[5]', '[4]', '[3]', '[2]', '[1]', '?' ),
+				array(
+					'[9]',
+					'[8]',
+					'[7]',
+					'[6]',
+					'[5]',
+					'[4]',
+					'[3]',
+					'[2]',
+					'?' . $this->lang_tag . '=$matches[1]&'
+				),
+				$rule
+			);
+		}
+
+			$slug                      = $wp_rewrite->root . $this->lang_tag . '/(' . $enabled_language_string . ')/';
+			$collector[ $slug . '?$' ] = $wp_rewrite->index . '?' . $this->lang_tag . '=$matches[1]';
+
+		return $collector + $rules;
 	}
 
 	/**
@@ -73,8 +233,8 @@ class FW_Extension_Translation extends FW_Extension {
 	 * Set active language and set it to cookie.
 	 */
 	public function set_active_cookie() {
-		if ( ! headers_sent() ) {
-			$active_lang = get_query_var( 'fw_lang',
+		if ( ! headers_sent() && ! is_admin() ) {
+			$active_lang = get_query_var( $this->lang_tag,
 				isset( $_COOKIE['fw_active_lang'] ) ?
 					$_COOKIE['fw_active_lang'] :
 					$this->get_default_language_code()
@@ -393,11 +553,11 @@ class FW_Extension_Translation extends FW_Extension {
 
 		$str = '<ul>';
 		foreach ( $frontend_urls as $lang_code => $link ) {
-			$str.= '<li><a href="' . $link . '"><img src="' . fw_ext_translation_get_flag( $lang_code ) . '">&nbsp;&nbsp;' . fw_ext_translation_get_language_name( $lang_code ) . '</a></li>';
+			$str .= '<li><a href="' . $link . '"><img src="' . fw_ext_translation_get_flag( $lang_code ) . '">&nbsp;&nbsp;' . fw_ext_translation_get_language_name( $lang_code ) . '</a></li>';
 		}
 		$str .= '</ul>';
 
-		echo apply_filters('fw_ext_translation_change_render_language_switcher', $str, $frontend_urls);
+		echo apply_filters( 'fw_ext_translation_change_render_language_switcher', $str, $frontend_urls );
 	}
 
 	/**
@@ -406,13 +566,26 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @return array
 	 */
 	private function generate_default_frontend_switch_urls() {
-		$languages = $this->get_enabled_languages();
-		$collector = array();
-		foreach ( $languages as $code => $language ) {
-			$collector[ $code ] = add_query_arg( array( 'fw_lang' => $code ) );
+
+		$languages     = $this->get_enabled_languages();
+		$frontend_urls = array();
+		global $wp_rewrite;
+		$current_url = ( fw_current_url() === preg_replace( '/(\/fw_lang\/)(\w+)/ix', '', get_home_url() ) ) ?
+			get_home_url() :
+			fw_current_url();
+
+		foreach ( $languages as $lang_code => $language ) {
+			if ( $wp_rewrite->using_permalinks() ) {
+				$permalink = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, $current_url );
+
+				$frontend_urls[ $lang_code ] = $permalink;
+			} else {
+				$permalink                   = remove_query_arg( 'fw_lang', $current_url );
+				$frontend_urls[ $lang_code ] = add_query_arg( array( 'fw_lang' => $lang_code ), $permalink );
+			}
 		}
 
-		return $collector;
+		return $frontend_urls;
 	}
 
 	/**

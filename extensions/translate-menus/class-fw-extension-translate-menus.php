@@ -54,12 +54,14 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 	public function frontend_filter_menu_by_language( $args ) {
 		$mods = get_theme_mod( 'nav_menu_locations' );
 
-		$term_id        = empty( $args['menu'] ) ? $mods[ $args['theme_location'] ] : $args['menu']->term_id;
-		$translation_id = fw_get_term_meta( $term_id, 'translation_id', true );
-		$active_menu    = $this->query_translation_by_language( $translation_id, $this->get_parent()->get_frontend_active_language() );
+		if(!empty($mods)){
+			$term_id        = empty( $args['menu'] ) ? $mods[ $args['theme_location'] ] : $args['menu']->term_id;
+			$translation_id = fw_get_term_meta( $term_id, 'translation_id', true );
+			$active_menu    = $this->query_translation_by_language( $translation_id, $this->get_parent()->get_frontend_active_language() );
 
-		if ( ! empty( $active_menu ) ) {
-			$args['menu'] = $active_menu['term_id'];
+			if ( ! empty( $active_menu ) ) {
+				$args['menu'] = $active_menu['term_id'];
+			}
 		}
 
 		return $args;

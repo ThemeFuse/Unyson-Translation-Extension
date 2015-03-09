@@ -59,3 +59,30 @@ function fw_ext_translation_generate_language_choices(){
 	return $languages;
 }
 
+/**
+ * Get language from locale.
+ *
+ * @param $locale
+ *
+ * @return mixed
+ */
+function fw_ext_translation_get_language_from_locale($locale){
+	return fw_ext('translation')->languages_list->get_language_from_locale($locale);
+}
+
+/**
+ * Get default language.
+ * @return mixed
+ */
+function fw_ext_translation_get_default_language(){
+	return fw_ext_translation_get_language_from_locale(get_locale());
+}
+
+/**
+ * Get translate to languages.
+ * @return array
+ */
+function fw_ext_translation_get_translate_to_languages(){
+	return array_diff(array('de','en','fr'), (array) get_locale());
+}
+

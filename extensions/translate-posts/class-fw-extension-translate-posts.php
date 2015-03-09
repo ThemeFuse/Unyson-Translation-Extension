@@ -18,8 +18,6 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 */
 	protected function _init() {
 
-		add_filter( 'post_link', array( $this, 'permalink_filter' ), 1, 2 );
-
 		if ( is_admin() ) {
 			$this->add_admin_filters();
 			$this->add_admin_actions();
@@ -98,16 +96,18 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 *
 	 * @return mixed
 	 */
-	public function convert_wp_list_table_urls($data){
-		foreach($data as $key => &$partial){
+	public function convert_wp_list_table_urls( $data ) {
+		foreach ( $data as $key => &$partial ) {
 			$dom_element = new DOMDocument();
-			$dom_element->loadHTML($partial);
-			$obj = $dom_element->getElementsByTagName('a')->item(0);
-			$obj->setAttribute('href', add_query_arg(array( 'fw_all_languages' => true ),$obj->getAttribute('href')));
-			$data[$key] = $dom_element->saveXML($obj, LIBXML_NOEMPTYTAG);
+			$dom_element->loadHTML( $partial );
+			$obj = $dom_element->getElementsByTagName( 'a' )->item( 0 );
+			$obj->setAttribute( 'href', add_query_arg( array( 'fw_all_languages' => true ), $obj->getAttribute( 'href' ) ) );
+			$data[ $key ] = $dom_element->saveXML( $obj, LIBXML_NOEMPTYTAG );
 		}
+
 		return $data;
 	}
+
 	/**
 	 * Set all languages link in array.
 	 *
@@ -117,8 +117,8 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 */
 	public function set_all_languages_link( $views ) {
 
-		if(!is_null(FW_Request::GET('fw_all_languages'))){
-			$views = $this->convert_wp_list_table_urls($views);
+		if ( ! is_null( FW_Request::GET( 'fw_all_languages' ) ) ) {
+			$views = $this->convert_wp_list_table_urls( $views );
 		}
 		$views['all_languages'] = '<a href="' . add_query_arg( array( 'fw_all_languages' => true ) ) . '">All Languages</a>';
 
@@ -160,8 +160,8 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		add_filter( 'parse_query', array( $this, 'filter_query_by_active_language' ) );//+
 		add_filter( 'terms_clauses', array( $this, 'change_terms_query' ) );//+
 		add_filter( 'posts_where', array( $this, 'filter_posts_where' ) );//+
-		if(is_null(FW_Request::GET('fw_all_languages'))){
-			add_filter( 'wp_count_posts', array( $this, 'count_post_by_language'), 10, 3 );
+		if ( is_null( FW_Request::GET( 'fw_all_languages' ) ) ) {
+			add_filter( 'wp_count_posts', array( $this, 'count_post_by_language' ), 10, 3 );
 		}
 	}
 
@@ -385,7 +385,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 *
 	 * @return array|bool|mixed|object
 	 */
-	public function count_post_by_language($counts, $type, $perm){
+	public function count_post_by_language( $counts, $type, $perm ) {
 		global $wpdb;
 
 		$lang = $this->get_parent()->get_admin_active_language();
@@ -397,7 +397,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		AND pm.post_id = {$wpdb->posts}.ID
 		 WHERE post_type = %s";
 		if ( 'readable' == $perm && is_user_logged_in() ) {
-			$post_type_object = get_post_type_object($type);
+			$post_type_object = get_post_type_object( $type );
 			if ( ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
 				$query .= $wpdb->prepare( " AND (post_status != 'private' OR ( post_author = %d AND post_status = 'private' ))",
 					get_current_user_id()
@@ -406,16 +406,17 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		}
 
 		$query .= ' GROUP BY post_status';
-		$cache_key = 'fw_count_'.$type;
-		$counts = wp_cache_get( $cache_key );
+		$cache_key = 'fw_count_' . $type;
+		$counts    = wp_cache_get( $cache_key );
 
 		if ( false === $counts ) {
 			$results = (array) $wpdb->get_results( $wpdb->prepare( $query, $lang, $type ), ARRAY_A );
 
 			$counts = array_fill_keys( get_post_stati(), 0 );
 
-			foreach ( $results as $row )
+			foreach ( $results as $row ) {
 				$counts[ $row['post_status'] ] = $row['num_posts'];
+			}
 
 			$counts = (object) $counts;
 			wp_cache_set( $cache_key, $counts );
@@ -523,27 +524,17 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 				$permalink = get_permalink( $translation_data['post_id'] );
 
 				if ( $wp_rewrite->using_permalinks() ) {
-					$permalink = preg_replace( '(fw_lang\/\w+\/)', '', $permalink );
+					$permalink = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, $permalink );
 
-
-					if ( $permalink === home_url( '/' ) ) {
-						$permalink = preg_replace( '(fw_lang\/\w+\/)', '', _get_page_link( $translation_data['post_id'] ) );
-					}
-
-					$frontend_urls[ $lang_code ] = $permalink . 'fw_lang/' . $lang_code;
+					$frontend_urls[ $lang_code ] = $permalink;
 				} else {
-					$permalink = remove_query_arg( 'fw_lang', $permalink );
-
-					if ( $permalink === home_url( '/' ) ) {
-						$frontend_urls[ $lang_code ] = $permalink;
-					} else {
-						$frontend_urls[ $lang_code ] = add_query_arg( array( 'fw_lang' => $lang_code ), $permalink );
-					}
+					$permalink                   = remove_query_arg( 'fw_lang', $permalink );
+					$frontend_urls[ $lang_code ] = add_query_arg( array( 'fw_lang' => $lang_code ), $permalink );
 				}
 
 			} else {
 				//translation did not exists for this post
-				$frontend_urls[ $lang_code ] = add_query_arg( array( 'fw_lang' => $lang_code ), get_home_url( '/' ) );
+				$frontend_urls[ $lang_code ] = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, get_home_url( '/' ) );
 			}
 		}
 
@@ -583,7 +574,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		$query_object = new WP_Query();
 		$posts        = $query_object->query( array(
 			'post_type'      => array_keys( $post_types ),
-			'post_status'    => array('publish', 'draft'),
+			'post_status'    => array( 'publish', 'draft' ),
 			'posts_per_page' => - 1,
 			'meta_query'     => array(
 				'relation' => 'AND',

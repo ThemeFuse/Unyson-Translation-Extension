@@ -25,7 +25,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 
 		add_action( 'admin_enqueue_scripts', array( $this, '_admin_action_add_static' ), 20 );
 
-		add_filter( 'term_link', array( $this, 'term_link_filter' ), 10, 3 );
+		//add_filter( 'term_link', array( $this, 'term_link_filter' ), 10, 3 );
 
 		add_filter( 'terms_clauses', array( $this, 'change_frontend_terms_query' ) );
 
@@ -202,11 +202,11 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 *
 	 * @return array
 	 */
-	private function get_filtered_tax_types() {
+	public function get_filtered_tax_types() {
 		static $filtered_tax_types = array();
 		if ( empty( $filtered_tax_types ) ) {
-			$wp_tax_types     = get_taxonomies( array( 'public' => true, '_builtin' => true ) );
-			$custom_tax_types = get_taxonomies( array( 'public' => true, '_builtin' => false ) );
+			$wp_tax_types       = get_taxonomies( array( 'public' => true, '_builtin' => true ) );
+			$custom_tax_types   = get_taxonomies( array( 'public' => true, '_builtin' => false ) );
 			$filtered_tax_types = array_merge( $wp_tax_types, $custom_tax_types );
 		}
 
@@ -295,8 +295,8 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 			return;
 		}
 
-		$translation_id = FW_Request::POST( 'fw_options/fw_translate_id', $term_id );
-		$translation_lang = FW_Request::POST( 'fw_options/fw_translate_to', $this->get_parent()->get_admin_active_language());
+		$translation_id     = FW_Request::POST( 'fw_options/fw_translate_id', $term_id );
+		$translation_lang   = FW_Request::POST( 'fw_options/fw_translate_to', $this->get_parent()->get_admin_active_language() );
 		$translations       = $this->query_translation( $translation_id );
 		$translation_exists = $this->translation_exists( $translations, $translation_lang );
 
@@ -492,8 +492,8 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	public function get_post_types_taxonomies() {
 		$collector = array();
 
-		$wp_post_types     = get_post_types( array( 'public' => true, '_builtin' => true ) );
-		$custom_post_types = get_post_types( array( 'public' => true, '_builtin' => false ) );
+		$wp_post_types       = get_post_types( array( 'public' => true, '_builtin' => true ) );
+		$custom_post_types   = get_post_types( array( 'public' => true, '_builtin' => false ) );
 		$filtered_post_types = array_merge( $wp_post_types, $custom_post_types );
 
 
@@ -658,16 +658,15 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 				$term_link = get_term_link( (int) $translation_data['term_id'], $taxonomy );
 
 				if ( $wp_rewrite->using_permalinks() ) {
-					$term_link     = preg_replace( '(fw_lang\/\w+\/)', '', $term_link );
-					$urls[ $code ] = $term_link . 'fw_lang/' . $code;
+					$term_link     = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $code, $term_link );
+					$urls[ $code ] = $term_link;
 				} else {
 					remove_query_arg( 'fw_lang', $term_link );
 					$urls[ $code ] = add_query_arg( array( 'fw_lang' => $code ), $term_link );
 				}
 			} else {
 				//translation did not exists for this post
-				$urls[ $code ] = add_query_arg( array( 'fw_lang' => $code ), get_home_url( '/' ) );
-
+				$urls[ $code ] = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $code, get_home_url( '/' ) );
 			}
 		}
 
