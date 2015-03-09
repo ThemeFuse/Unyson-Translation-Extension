@@ -25,8 +25,6 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 
 		add_action( 'admin_enqueue_scripts', array( $this, '_admin_action_add_static' ), 20 );
 
-		//add_filter( 'term_link', array( $this, 'term_link_filter' ), 10, 3 );
-
 		add_filter( 'terms_clauses', array( $this, 'change_frontend_terms_query' ) );
 
 	}
@@ -671,30 +669,5 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		}
 
 		return $urls;
-	}
-
-	/**
-	 * Filter term links in frontend to add active language endpoint.
-	 *
-	 * @param $termlink
-	 * @param $term
-	 * @param $taxonomy
-	 *
-	 * @return string
-	 */
-	public function term_link_filter( $termlink, $term, $taxonomy ) {
-		if ( ! is_admin() ) {
-			global $wp_rewrite;
-
-			$lang = $this->get_parent()->get_frontend_active_language();
-
-			if ( $wp_rewrite->using_permalinks() ) {
-				$termlink = $termlink . 'fw_lang/' . $lang . '/';
-			} else {
-				$termlink = add_query_arg( array( 'fw_lang' => $lang ), $termlink );
-			}
-		}
-
-		return $termlink;
 	}
 }

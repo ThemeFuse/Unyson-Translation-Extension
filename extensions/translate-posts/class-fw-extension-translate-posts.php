@@ -175,8 +175,8 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	public function filter_posts_where( $where ) {
 		global $pagenow, $wpdb;
 		if ( 'edit.php' === $pagenow &&
-			 ! is_null( FW_Request::get( 'fw_all_languages' ) ) &&
-			 $this->is_public_post_type()
+		     ! is_null( FW_Request::get( 'fw_all_languages' ) ) &&
+		     $this->is_public_post_type()
 		) {
 			$where .= " AND $wpdb->postmeta.meta_value IN ( '" . implode( "','", array_keys( $this->get_parent()->get_enabled_languages() ) ) . "' )";
 		}
@@ -539,30 +539,6 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		}
 
 		return $frontend_urls;
-	}
-
-	/**
-	 * Filter frontend permalinks, add active language endpoint.
-	 *
-	 * @param $permalink
-	 * @param $post
-	 *
-	 * @return string
-	 */
-	public function permalink_filter( $permalink, $post ) {
-		if ( ! is_admin() ) {
-			global $wp_rewrite;
-
-			$lang = $this->get_parent()->get_frontend_active_language();
-
-			if ( $wp_rewrite->using_permalinks() ) {
-				$permalink = $permalink . 'fw_lang/' . $lang . '/';
-			} else {
-				$permalink = add_query_arg( array( 'fw_lang' => $lang ), $permalink );
-			}
-		}
-
-		return $permalink;
 	}
 
 	/**
