@@ -18,13 +18,14 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 * @internal
 	 */
 	protected function _init() {
-		$this->add_admin_filters();
-		$this->add_admin_actions();
 
-		add_filter( 'pre_get_posts', array( $this, 'filter_date_page' ) );
+		if(is_admin()){
+			$this->add_admin_filters();
+			$this->add_admin_actions();
+		}
 
 		add_action( 'admin_enqueue_scripts', array( $this, '_admin_action_add_static' ), 20 );
-
+		add_filter( 'pre_get_posts', array( $this, 'filter_date_page' ) );
 		add_filter( 'terms_clauses', array( $this, 'change_frontend_terms_query' ) );
 
 	}

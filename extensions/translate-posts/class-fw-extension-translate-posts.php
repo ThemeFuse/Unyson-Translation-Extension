@@ -160,8 +160,11 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		add_filter( 'parse_query', array( $this, 'filter_query_by_active_language' ) );//+
 		add_filter( 'terms_clauses', array( $this, 'change_terms_query' ) );//+
 		add_filter( 'posts_where', array( $this, 'filter_posts_where' ) );//+
+
 		if ( is_null( FW_Request::GET( 'fw_all_languages' ) ) ) {
 			add_filter( 'wp_count_posts', array( $this, 'count_post_by_language' ), 10, 3 );
+		} else{
+			add_filter( 'wp_count_posts', array( $this, 'count_post_by_all_languages' ), 10, 3 );
 		}
 	}
 
@@ -411,6 +414,53 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 
 		if ( false === $counts ) {
 			$results = (array) $wpdb->get_results( $wpdb->prepare( $query, $lang, $type ), ARRAY_A );
+
+			$counts = array_fill_keys( get_post_stati(), 0 );
+
+			foreach ( $results as $row ) {
+				$counts[ $row['post_status'] ] = $row['num_posts'];
+			}
+
+			$counts = (object) $counts;
+			wp_cache_set( $cache_key, $counts );
+		}
+
+		return $counts;
+	}
+
+	/**
+	 * Count correct when is set all_language get parameter.
+	 * @param $counts
+	 * @param $type
+	 * @param $perm
+	 *
+	 * @return array|bool|mixed|object
+	 */
+	public function count_post_by_all_languages( $counts, $type, $perm ) {
+		global $wpdb;
+
+		$lang = $this->get_parent()->get_admin_active_language();
+
+		$query = "SELECT post_status, COUNT( * ) AS num_posts FROM {$wpdb->posts}
+		 JOIN {$wpdb->postmeta} as pm
+		ON pm.meta_key = 'translation_lang'
+		AND pm.post_id = {$wpdb->posts}.ID
+		 WHERE post_type = %s AND pm.meta_value IN ( '" . implode( "','", array_keys( $this->get_parent()->get_enabled_languages() ) ) . "' )";
+		if ( 'readable' == $perm && is_user_logged_in() ) {
+			$post_type_object = get_post_type_object( $type );
+			if ( ! current_user_can( $post_type_object->cap->read_private_posts ) ) {
+				$query .= $wpdb->prepare( " AND (post_status != 'private' OR ( post_author = %d AND post_status = 'private' ))",
+					get_current_user_id()
+				);
+			}
+		}
+
+		$query .= ' GROUP BY post_status';
+		$cache_key = 'fw_count_' . $type;
+		$counts    = wp_cache_get( $cache_key );
+
+		if ( false === $counts ) {
+			$results = (array) $wpdb->get_results( $wpdb->prepare( $query, $type ), ARRAY_A );
 
 			$counts = array_fill_keys( get_post_stati(), 0 );
 
