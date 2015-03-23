@@ -26,6 +26,9 @@ $options = array(
 				'type'     => 'switch',
 				'label'    => __( 'Convert data', 'fw' ),
 				'desc'     => __( 'Set to default language the posts, pages categories or tags that don\'t have a language set ?', 'fw' ),
+			),
+			'sidebar' => array(
+				'type' => 'sidebar-picker'
 			)
 		)
 	)
