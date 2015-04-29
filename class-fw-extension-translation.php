@@ -633,8 +633,9 @@ class FW_Extension_Translation extends FW_Extension {
 		$convert = fw_get_db_ext_settings_option( $this->get_name(), 'convert' );
 
 		if ( $convert ) {
-			$this->get_child( 'translate-terms' )->convert_terms_to_default_language();
-			$this->get_child( 'translate-posts' )->convert_posts_to_default_language();
+			$this->get_child('translate-menus')->convert_to_default_language();
+			$this->get_child( 'translate-terms' )->convert_to_default_language();
+			$this->get_child( 'translate-posts' )->convert_to_default_language();
 		}
 	}
 }

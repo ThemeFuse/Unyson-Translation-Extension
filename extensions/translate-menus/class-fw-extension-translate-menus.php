@@ -12,6 +12,7 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 	 * @internal
 	 */
 	protected function _init() {
+
 		if ( is_admin() ) {
 			$this->add_admin_actions();
 			$this->add_admin_filters();
@@ -25,13 +26,13 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 	 */
 	public function _admin_action_add_static() {
 		wp_enqueue_script(
-			$this->get_name() . '-scripts', $this->get_declared_URI( '/static/js/nav-menu-switcher.js' ),
+			$this->get_name() . '-scripts', $this->get_uri( '/static/js/nav-menu-switcher.js' ),
 			array( 'jquery' )
 		);
 
 		wp_enqueue_style(
 			'fw-extension-' . $this->get_name() . '-css',
-			$this->get_declared_URI( '/static/css/style.css' ),
+			$this->get_uri( '/static/css/style.css' ),
 			false,
 			fw()->manifest->get_version()
 		);
@@ -310,6 +311,16 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 
 			fw_update_term_meta( $term_id, 'translation_id', $translation_id );
 			fw_update_term_meta( $term_id, 'translation_lang', $language );
+		}
+	}
+
+	function convert_to_default_language(){
+
+		$menus = wp_get_nav_menus();
+
+		foreach( $menus as $menu){
+			fw_update_term_meta( $menu->term_id, 'translation_id', $menu->term_id );
+			fw_update_term_meta( $menu->term_id, 'translation_lang', $this->get_parent()->get_default_language_code() );
 		}
 	}
 }

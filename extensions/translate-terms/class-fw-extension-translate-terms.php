@@ -532,7 +532,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	/**
 	 * Convert terms ( tags, categories ) to default language.
 	 */
-	public function convert_terms_to_default_language() {
+	public function convert_to_default_language() {
 
 		$taxonomies = $this->get_filtered_tax_types();
 		$terms      = $this->get_untranslated_terms( $taxonomies );

@@ -594,7 +594,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	/**
 	 * Convert post to default language.
 	 */
-	public function convert_posts_to_default_language() {
+	public function convert_to_default_language() {
 
 		$post_types   = $this->get_filtered_post_types();
 		$query_object = new WP_Query();
