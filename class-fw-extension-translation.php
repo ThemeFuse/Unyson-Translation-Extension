@@ -628,6 +628,9 @@ class FW_Extension_Translation extends FW_Extension {
 		return $this->languages_list->get_language( $this->get_default_language_code() );
 	}
 
+	/**
+	 * Convert data to default language
+	 */
 	public function convert_data_to_default_language() {
 
 		$convert = fw_get_db_ext_settings_option( $this->get_name(), 'convert' );
@@ -636,6 +639,7 @@ class FW_Extension_Translation extends FW_Extension {
 			$this->get_child('translate-menus')->convert_to_default_language();
 			$this->get_child( 'translate-terms' )->convert_to_default_language();
 			$this->get_child( 'translate-posts' )->convert_to_default_language();
+			$this->get_child('translate-widgets')->convert_to_default_language();
 		}
 	}
 }

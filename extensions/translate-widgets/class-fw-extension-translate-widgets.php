@@ -34,7 +34,7 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 	protected function _init() {
 		//TODO group filters, actions in admin and frontend
 
-		add_action( 'parse_query', array( $this, 'action_init_frontend_active_widgets'), 40 );
+		add_action( 'parse_query', array( $this, 'action_init_frontend_active_widgets' ), 40 );
 
 		add_action( 'init', array( $this, 'action_init_backend_active_widgets' ), 2 );
 
@@ -53,6 +53,7 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 		add_filter( 'widget_posts_args', array( $this, 'filter_recent_posts_widget' ) );
 
 		add_filter( 'terms_clauses', array( $this, 'filter_backend_menu_widget' ), 10, 3 );
+
 	}
 
 	/**
@@ -71,7 +72,7 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 	/**
 	 * Init frontend active widgets filtered by language.
 	 */
-	public function action_init_frontend_active_widgets () {
+	public function action_init_frontend_active_widgets() {
 		if ( ! is_admin() ) {
 			$this->frontend_active_widgets = $this->filter_widgets_by_language( 'frontend' );
 		}
@@ -81,8 +82,8 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 	 * Init backend active widgets filtered by language.
 	 */
 	public function action_init_backend_active_widgets() {
-		if(is_admin()) {
-			$this->backend_active_widgets  = $this->filter_widgets_by_language( 'backend' );
+		if ( is_admin() ) {
+			$this->backend_active_widgets = $this->filter_widgets_by_language( 'backend' );
 		}
 	}
 
@@ -213,5 +214,23 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 		}
 
 		return $collector;
+	}
+
+	/**
+	 * Convert widgets to default language.
+	 */
+	public function convert_to_default_language() {
+		$sidebars = wp_get_sidebars_widgets();
+
+		foreach ( $sidebars as $widgets ) {
+			foreach ( $widgets as $widget ) {
+				$parts                          = explode( '-', strrev( $widget ), 2 );
+				$option_name                    = 'widget_' . strrev( $parts[1] );
+				$option                         = get_option( $option_name );
+				$option[ $parts[0] ]['fw_lang'] = $this->get_parent()->get_default_language_code();
+
+				update_option( $option_name, $option );
+			}
+		}
 	}
 }
