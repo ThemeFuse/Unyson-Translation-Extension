@@ -19,7 +19,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 */
 	protected function _init() {
 
-		if(is_admin()){
+		if ( is_admin() ) {
 			$this->add_admin_filters();
 			$this->add_admin_actions();
 		}
@@ -35,6 +35,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 */
 	public function add_admin_filters() {
 		add_filter( 'terms_clauses', array( $this, 'change_admin_terms_query' ) );
+		add_filter( 'terms_clauses', array( $this, 'filter_tags_in_posts' ) );
 		add_filter( 'get_edit_term_link', array( $this, 'filter_edit_term_link' ), 10, 4 );
 	}
 
@@ -50,7 +51,6 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 			'generate_categories_in_enabled_languages'
 		) );
 		add_action( 'save_post', array( $this, 'save_default_post_categories' ) );
-
 	}
 
 	/**
@@ -130,6 +130,24 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		}
 	}
 
+	public function filter_tags_in_posts( $query ) {
+		global $pagenow;
+		global $wpdb;
+
+		if (
+			'admin-ajax.php' === $pagenow and
+			'ajax-tag-search' === FW_Request::GET( 'action' )
+		) {
+			$active_lang = FW_Request::GET( 'fw_translate_to', $this->get_parent()->get_admin_active_language() );
+			$query['join'] .= " INNER JOIN $wpdb->fw_termmeta AS fw_tm
+								ON t.term_id = fw_tm.fw_term_id AND
+								fw_tm.meta_key = 'translation_lang' AND
+								fw_tm.meta_value = '" . $active_lang . "'";
+		}
+
+		return $query;
+	}
+
 	/**
 	 * Filter terms in frontend and backend by active language.
 	 *
@@ -144,7 +162,11 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		//filter backend
 		if ( $this->is_public_tax_type() ) {
 
-			if ( 'edit-tags.php' === $pagenow and is_null( FW_Request::get( 'fw_all_languages' ) ) ) {
+			if ( (
+				'edit-tags.php' === $pagenow and
+				is_null( FW_Request::get( 'fw_all_languages' ) )
+			)
+			) {
 				$active_lang = FW_Request::GET( 'fw_translate_to', $this->get_parent()->get_admin_active_language() );
 				$query['join'] .= " INNER JOIN $wpdb->fw_termmeta AS fw_tm
 								ON t.term_id = fw_tm.fw_term_id AND
@@ -189,9 +211,9 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 * Verify if the taxonomy is public.
 	 * @return bool
 	 */
-	public function is_public_tax_type() {
+	public function is_public_tax_type( $taxonomy = null ) {
 
-		$tax_type = FW_Request::GET( 'taxonomy', FW_Request::POST( 'taxonomy' ) );
+		$tax_type = is_null( $taxonomy ) ? FW_Request::GET( 'taxonomy', FW_Request::POST( 'taxonomy' ) ) : $taxonomy;
 
 		return in_array( $tax_type, $this->get_filtered_tax_types() );
 	}
@@ -290,32 +312,38 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 * @param $taxonomy
 	 */
 	function create_term( $term_id, $tt_id, $taxonomy ) {
-		if ( ! $this->is_public_tax_type() && FW_Request::REQUEST( 'action' ) !== 'add-tag' ) {
-			return;
+
+		if ( $this->is_public_tax_type( $taxonomy ) && (
+				FW_Request::REQUEST( 'action' ) === 'add-tag' ||
+				FW_Request::REQUEST( 'action' ) === 'editpost' ||
+				FW_Request::REQUEST( 'action' ) === 'add-category'
+			)
+		) {
+
+			$translation_id     = FW_Request::POST( 'fw_options/fw_translate_id', $term_id );
+			$translation_lang   = FW_Request::POST( 'fw_options/fw_translate_to', $this->get_parent()->get_admin_active_language() );
+			$translations       = $this->query_translation( $translation_id );
+			$translation_exists = $this->translation_exists( $translations, $translation_lang );
+
+			if ( ! empty( $translation_exists ) ) {
+				$response    = array(
+					'what'   => 'taxonomy',
+					'action' => 'add-tag',
+					'id'     => new WP_Error( 'translation_exists', __( 'The term translation does already exists.ACTION +++ ' . FW_Request::REQUEST( 'action' ) ) ),
+				);
+				$xmlResponse = new WP_Ajax_Response( $response );
+				$xmlResponse->send();
+			}
+
+			fw_update_term_meta( $term_id, 'translation_id', $translation_id );
+			fw_update_term_meta( $term_id, 'translation_lang', $translation_lang );
+
+			if ( ! is_null( FW_Request::POST( 'fw_options/fw_second_translate_to' ) ) ) {
+				fw_update_term_meta( $translation_id, 'translation_id', $translation_id );
+				fw_update_term_meta( $translation_id, 'translation_lang', FW_Request::POST( 'fw_options/fw_second_translate_to' ) );
+			}
 		}
 
-		$translation_id     = FW_Request::POST( 'fw_options/fw_translate_id', $term_id );
-		$translation_lang   = FW_Request::POST( 'fw_options/fw_translate_to', $this->get_parent()->get_admin_active_language() );
-		$translations       = $this->query_translation( $translation_id );
-		$translation_exists = $this->translation_exists( $translations, $translation_lang );
-
-		if ( ! empty( $translation_exists ) ) {
-			$response    = array(
-				'what'   => 'taxonomy',
-				'action' => 'add-tag',
-				'id'     => new WP_Error( 'translation_exists', __( 'The term translation does already exists.ACTION +++ ' . FW_Request::REQUEST( 'action' ) ) ),
-			);
-			$xmlResponse = new WP_Ajax_Response( $response );
-			$xmlResponse->send();
-		}
-
-		fw_update_term_meta( $term_id, 'translation_id', $translation_id );
-		fw_update_term_meta( $term_id, 'translation_lang', $translation_lang );
-
-		if ( ! is_null( FW_Request::POST( 'fw_options/fw_second_translate_to' ) ) ) {
-			fw_update_term_meta( $translation_id, 'translation_id', $translation_id );
-			fw_update_term_meta( $translation_id, 'translation_lang', FW_Request::POST( 'fw_options/fw_second_translate_to' ) );
-		}
 	}
 
 	/**
