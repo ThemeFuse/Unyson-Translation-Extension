@@ -29,9 +29,9 @@ class FW_Extension_Translation extends FW_Extension {
 	protected function _init() {
 		$this->languages_list = new FW_Language();
 
-		add_action( 'shutdown', array($this, 'enable_flush_rules') );
-		add_action( 'fw_extensions_after_activation', array($this , 'set_flush_rules_option') );
-		add_action( 'fw_extensions_before_deactivation', array($this, 'disable_flush_rules') );
+		add_action( 'shutdown', array( $this, 'enable_flush_rules' ) );
+		add_action( 'fw_extensions_after_activation', array( $this, 'set_flush_rules_option' ) );
+		add_action( 'fw_extensions_before_deactivation', array( $this, 'disable_flush_rules' ) );
 
 		if ( is_admin() ) {
 			$this->add_admin_actions();
@@ -55,7 +55,7 @@ class FW_Extension_Translation extends FW_Extension {
 		add_filter( 'option_page_on_front', array( $this, 'translate_home_page' ) );
 		add_filter( 'option_page_for_posts', array( $this, 'translate_home_page' ) );
 		add_filter( 'pre_get_posts', array( $this, 'filter_homepage_query' ) );
-		add_filter( 'home_url', array($this, 'filter_home_url'), 10, 3 );
+		add_filter( 'home_url', array( $this, 'filter_home_url' ), 10, 3 );
 
 	}
 
@@ -84,7 +84,7 @@ class FW_Extension_Translation extends FW_Extension {
 				$url = untrailingslashit( $url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $active_lang );
 			}
 		} else {
-			$url = add_query_arg( array( $this->lang_tag => $active_lang ), $url );
+			$url = esc_url( add_query_arg( array( $this->lang_tag => $active_lang ), $url ) );
 		}
 
 		return $url;
@@ -202,8 +202,8 @@ class FW_Extension_Translation extends FW_Extension {
 			);
 		}
 
-			$slug                      = $wp_rewrite->root . $this->lang_tag . '/(' . $enabled_language_string . ')/';
-			$collector[ $slug . '?$' ] = $wp_rewrite->index . '?' . $this->lang_tag . '=$matches[1]';
+		$slug                      = $wp_rewrite->root . $this->lang_tag . '/(' . $enabled_language_string . ')/';
+		$collector[ $slug . '?$' ] = $wp_rewrite->index . '?' . $this->lang_tag . '=$matches[1]';
 
 		return $collector + $rules;
 	}
@@ -420,7 +420,7 @@ class FW_Extension_Translation extends FW_Extension {
 		foreach ( $languages as $code => $language ) {
 			$collector[ $code ] = array(
 				'lang_name' => $language['name'],
-				'url'       => add_query_arg( array( 'fw_translate_to' => $code ) )
+				'url'       => esc_url( add_query_arg( array( 'fw_translate_to' => $code ) ) )
 			);
 		}
 
@@ -580,8 +580,8 @@ class FW_Extension_Translation extends FW_Extension {
 
 				$frontend_urls[ $lang_code ] = $permalink;
 			} else {
-				$permalink                   = remove_query_arg( 'fw_lang', $current_url );
-				$frontend_urls[ $lang_code ] = add_query_arg( array( 'fw_lang' => $lang_code ), $permalink );
+				$permalink                   = esc_url( remove_query_arg( 'fw_lang', $current_url ) );
+				$frontend_urls[ $lang_code ] = esc_url( add_query_arg( array( 'fw_lang' => $lang_code ), $permalink ) );
 			}
 		}
 
@@ -636,10 +636,10 @@ class FW_Extension_Translation extends FW_Extension {
 		$convert = fw_get_db_ext_settings_option( $this->get_name(), 'convert' );
 
 		if ( $convert ) {
-			$this->get_child('translate-menus')->convert_to_default_language();
+			$this->get_child( 'translate-menus' )->convert_to_default_language();
 			$this->get_child( 'translate-terms' )->convert_to_default_language();
 			$this->get_child( 'translate-posts' )->convert_to_default_language();
-			$this->get_child('translate-widgets')->convert_to_default_language();
+			$this->get_child( 'translate-widgets' )->convert_to_default_language();
 		}
 	}
 }

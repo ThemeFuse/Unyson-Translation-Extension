@@ -111,7 +111,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		if ( $this->is_public_tax_type() ) {
 			echo '<script id="fw-list-table-link" type="text/template">';
 			echo '<ul class="subsubsub">';
-			echo '<li><a href="' . add_query_arg( array( 'fw_all_languages' => true ) ) . '">' . __( 'All Languages', 'fw' ) . '</a></li>';
+			echo '<li><a href="' . esc_url( add_query_arg( array( 'fw_all_languages' => true ) ) ) . '">' . __( 'All Languages', 'fw' ) . '</a></li>';
 			echo '</ul>';
 			echo '</script>';
 		}
@@ -245,7 +245,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 * @return string
 	 */
 	function filter_edit_term_link( $location, $term_id, $taxonomy, $object_type ) {
-		return $this->is_public_tax_type() ? add_query_arg( array( 'fw_translate_to' => $this->get_language_from_term( $term_id ) ), $location ) :
+		return $this->is_public_tax_type() ? esc_url( add_query_arg( array( 'fw_translate_to' => $this->get_language_from_term( $term_id ) ), $location ) ) :
 			$location;
 	}
 
@@ -479,26 +479,26 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 				if ( $meta_translation_id > 0 ) {
 					$urls[ $code ] = array(
 						'lang_name' => $language['name'],
-						'url'       => add_query_arg(
+						'url'       => esc_url( add_query_arg(
 							array(
 								'post_type'       => $post_type,
 								'taxonomy'        => $taxonomy,
 								'fw_translate_to' => $code,
 								'fw_translate_id' => $translate_id
-							), admin_url( 'edit-tags.php' ) ),
+							), admin_url( 'edit-tags.php' ) ) ),
 						'type'      => 'add'
 					);
 				} else {
 					$urls[ $code ] = array(
 						'lang_name' => $language['name'],
-						'url'       => add_query_arg(
+						'url'       => esc_url( add_query_arg(
 							array(
 								'post_type'              => $post_type,
 								'taxonomy'               => $taxonomy,
 								'fw_translate_to'        => $code,
 								'fw_translate_id'        => $translate_id,
 								'fw_second_translate_to' => $this->get_parent()->get_admin_active_language()
-							), admin_url( 'edit-tags.php' ) ),
+							), admin_url( 'edit-tags.php' ) ) ),
 						'type'      => 'add'
 					);
 				}
@@ -692,7 +692,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 					$urls[ $code ] = $term_link;
 				} else {
 					remove_query_arg( 'fw_lang', $term_link );
-					$urls[ $code ] = add_query_arg( array( 'fw_lang' => $code ), $term_link );
+					$urls[ $code ] = esc_url( add_query_arg( array( 'fw_lang' => $code ), $term_link ) );
 				}
 			} else {
 				//translation did not exists for this post

@@ -101,7 +101,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 			$dom_element = new DOMDocument();
 			$dom_element->loadHTML( $partial );
 			$obj = $dom_element->getElementsByTagName( 'a' )->item( 0 );
-			$obj->setAttribute( 'href', add_query_arg( array( 'fw_all_languages' => true ), $obj->getAttribute( 'href' ) ) );
+			$obj->setAttribute( 'href', esc_url( add_query_arg( array( 'fw_all_languages' => true ), $obj->getAttribute( 'href' ) ) ) );
 			$data[ $key ] = $dom_element->saveXML( $obj, LIBXML_NOEMPTYTAG );
 		}
 
@@ -120,7 +120,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		if ( ! is_null( FW_Request::GET( 'fw_all_languages' ) ) ) {
 			$views = $this->convert_wp_list_table_urls( $views );
 		}
-		$views['all_languages'] = '<a href="' . add_query_arg( array( 'fw_all_languages' => true ) ) . '">All Languages</a>';
+		$views['all_languages'] = '<a href="' . esc_url( add_query_arg( array( 'fw_all_languages' => true ) ) ) . '">All Languages</a>';
 
 		return $views;
 	}
@@ -163,7 +163,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 
 		if ( is_null( FW_Request::GET( 'fw_all_languages' ) ) ) {
 			add_filter( 'wp_count_posts', array( $this, 'count_post_by_language' ), 10, 3 );
-		} else{
+		} else {
 			add_filter( 'wp_count_posts', array( $this, 'count_post_by_all_languages' ), 10, 3 );
 		}
 	}
@@ -235,7 +235,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 */
 	public function change_edit_link( $post_link, $post_id ) {
 		return ( $this->is_public_post_type() ) ?
-			add_query_arg( array( 'fw_translate_to' => $this->get_language_from_post( $post_id ) ), $post_link ) :
+			esc_url( add_query_arg( array( 'fw_translate_to' => $this->get_language_from_post( $post_id ) ), $post_link ) ) :
 			$post_link;
 	}
 
@@ -430,6 +430,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 
 	/**
 	 * Count correct when is set all_language get parameter.
+	 *
 	 * @param $counts
 	 * @param $type
 	 * @param $perm
@@ -521,7 +522,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 			if ( ! empty( $collector ) ) {
 				$url[ $key ] = array(
 					'lang_name' => $language['name'],
-					'url'       => add_query_arg( array( 'fw_translate_to' => $key ), get_edit_post_link( $collector['post_id'] ) ),
+					'url'       => esc_url( add_query_arg( array( 'fw_translate_to' => $key ), get_edit_post_link( $collector['post_id'] ) ) ),
 					'type'      => 'edit'
 				);
 			} else {
@@ -578,8 +579,8 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 
 					$frontend_urls[ $lang_code ] = $permalink;
 				} else {
-					$permalink                   = remove_query_arg( 'fw_lang', $permalink );
-					$frontend_urls[ $lang_code ] = add_query_arg( array( 'fw_lang' => $lang_code ), $permalink );
+					$permalink                   = esc_url( remove_query_arg( 'fw_lang', $permalink ) );
+					$frontend_urls[ $lang_code ] = esc_url( add_query_arg( array( 'fw_lang' => $lang_code ), $permalink ) );
 				}
 
 			} else {

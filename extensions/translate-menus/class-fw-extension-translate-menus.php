@@ -55,7 +55,7 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 	public function frontend_filter_menu_by_language( $args ) {
 		$mods = get_theme_mod( 'nav_menu_locations' );
 
-		if(!empty($mods)){
+		if ( ! empty( $mods ) ) {
 			$term_id        = empty( $args['menu'] ) ? $mods[ $args['theme_location'] ] : $args['menu']->term_id;
 			$translation_id = fw_get_term_meta( $term_id, 'translation_id', true );
 			$active_menu    = $this->query_translation_by_language( $translation_id, $this->get_parent()->get_frontend_active_language() );
@@ -119,10 +119,10 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 			$translation_exists = $this->query_translation_by_language( $translation_id, $this->get_parent()->get_admin_active_language() );
 			$redirect_menu_id   = empty( $translation_exists ) ? 0 : $translation_exists['term_id'];
 
-			wp_redirect( add_query_arg( array(
+			wp_redirect( esc_url( add_query_arg( array(
 				'action' => 'edit',
 				'menu'   => $redirect_menu_id
-			), admin_url( $pagenow ) ) );
+			), admin_url( $pagenow ) ) ) );
 		}
 	}
 
@@ -208,17 +208,17 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 
 				$urls[ $code ] = array(
 					'lang_name' => $language['name'],
-					'url'       => add_query_arg( $args, admin_url( 'nav-menus.php' ) ),
+					'url'       => esc_url( add_query_arg( $args, admin_url( 'nav-menus.php' ) ) ),
 					'type'      => 'add'
 				);
 			} else {
 				$urls[ $code ] = array(
 					'lang_name' => $language['name'],
-					'url'       => add_query_arg( array(
+					'url'       => esc_url( add_query_arg( array(
 						'action'          => 'edit',
 						'menu'            => $translation_exists['term_id'],
 						'fw_translate_to' => $code
-					), admin_url( 'nav-menus.php' ) ),
+					), admin_url( 'nav-menus.php' ) ) ),
 					'type'      => 'edit'
 				);
 			}
@@ -314,11 +314,11 @@ class FW_Extension_Translate_Menus extends FW_Extension {
 		}
 	}
 
-	function convert_to_default_language(){
+	function convert_to_default_language() {
 
 		$menus = wp_get_nav_menus();
 
-		foreach( $menus as $menu){
+		foreach ( $menus as $menu ) {
 			fw_update_term_meta( $menu->term_id, 'translation_id', $menu->term_id );
 			fw_update_term_meta( $menu->term_id, 'translation_lang', $this->get_parent()->get_default_language_code() );
 		}
