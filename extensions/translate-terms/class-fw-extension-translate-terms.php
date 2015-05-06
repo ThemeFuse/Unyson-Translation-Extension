@@ -467,7 +467,8 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		$translated_terms      = $this->query_translation( $translate_id );
 		$translation_languages = ( $all_languages === true ) ? $this->get_parent()->get_enabled_languages() :
 			$this->get_parent()->get_enabled_languages_without( $translate_lang );
-
+		$tax                   = get_taxonomy( $taxonomy );
+		$post_type             = reset( $tax->object_type );
 
 		foreach ( $translation_languages as $code => $language ) {
 
@@ -480,6 +481,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 						'lang_name' => $language['name'],
 						'url'       => add_query_arg(
 							array(
+								'post_type'       => $post_type,
 								'taxonomy'        => $taxonomy,
 								'fw_translate_to' => $code,
 								'fw_translate_id' => $translate_id
@@ -491,6 +493,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 						'lang_name' => $language['name'],
 						'url'       => add_query_arg(
 							array(
+								'post_type'              => $post_type,
 								'taxonomy'               => $taxonomy,
 								'fw_translate_to'        => $code,
 								'fw_translate_id'        => $translate_id,
