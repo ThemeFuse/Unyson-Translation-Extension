@@ -19,7 +19,7 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @var
 	 */
 	public $languages_list;
-
+	public $home = '';
 	public $lang_tag = 'fw_lang';
 
 	/**
@@ -28,6 +28,8 @@ class FW_Extension_Translation extends FW_Extension {
 	 */
 	protected function _init() {
 		$this->languages_list = new FW_Language();
+
+		$this->home = get_home_url();
 
 		add_action( 'shutdown', array( $this, 'enable_flush_rules' ) );
 		add_action( 'fw_extensions_after_activation', array( $this, 'set_flush_rules_option' ) );
@@ -69,9 +71,16 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @return mixed|string
 	 */
 	public function filter_home_url( $url, $path, $schema ) {
+
 		$active_lang = $this->get_frontend_active_language();
 
-		if ( is_admin() || ! did_action( 'template_redirect' ) || did_action( 'login_init' ) ) {
+
+		if (
+			is_admin() ||
+			! did_action( 'template_redirect' ) ||
+			did_action( 'login_init' ) ||
+			rtrim( $url, '/' ) == rtrim( $this->home, '/' )
+		) {
 			return $url;
 		}
 
