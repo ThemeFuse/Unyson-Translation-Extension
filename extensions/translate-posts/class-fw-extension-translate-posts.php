@@ -38,7 +38,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 		} //check the global $typenow - set in admin.php
 		elseif ( $typenow ) {
 			return $typenow;
-		} //check the global $current_screen object - set in sceen.php
+		} //check the global $current_screen object - set in screen.php
 		elseif ( $current_screen && $current_screen->post_type ) {
 			return $current_screen->post_type;
 		} //lastly check the post_type querystring
@@ -235,7 +235,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 */
 	public function change_edit_link( $post_link, $post_id ) {
 		return ( $this->is_public_post_type() ) ?
-			esc_url( add_query_arg( array( 'fw_translate_to' => $this->get_language_from_post( $post_id ) ), $post_link ) ) :
+			esc_url_raw( add_query_arg( array( 'fw_translate_to' => $this->get_language_from_post( $post_id ) ), $post_link ) ) :
 			$post_link;
 	}
 
