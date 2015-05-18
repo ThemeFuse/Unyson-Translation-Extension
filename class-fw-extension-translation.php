@@ -40,7 +40,7 @@ class FW_Extension_Translation extends FW_Extension {
 			$this->add_admin_filters();
 		}
 
-		add_action( 'widgets_init', array( this, 'register_language_switcher_widget' ) );
+		add_action( 'widgets_init', array( $this, 'register_language_switcher_widget' ) );
 
 		// rewrite rules add language parameter.
 		add_filter( 'rewrite_rules_array', array( $this, 'change_rewrite_rules' ) ); // needed for post type archives
