@@ -40,9 +40,7 @@ class FW_Extension_Translation extends FW_Extension {
 			$this->add_admin_filters();
 		}
 
-		add_action( 'widgets_init', function () {
-			register_widget( 'FW_Widget_Language_Switcher' );
-		} );
+		add_action( 'widgets_init', array( this, 'register_language_switcher_widget' ) );
 
 		// rewrite rules add language parameter.
 		add_filter( 'rewrite_rules_array', array( $this, 'change_rewrite_rules' ) ); // needed for post type archives
@@ -59,6 +57,13 @@ class FW_Extension_Translation extends FW_Extension {
 		add_filter( 'pre_get_posts', array( $this, 'filter_homepage_query' ) );
 		add_filter( 'home_url', array( $this, 'filter_home_url' ), 10, 3 );
 
+	}
+
+	/**
+	 * Register language switcher widget.
+	 */
+	public function register_language_switcher_widget() {
+		register_widget( 'FW_Widget_Language_Switcher' );
 	}
 
 	/**
