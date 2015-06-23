@@ -197,7 +197,7 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 		$collector = array();
 
 		foreach ( $wp_registered_widgets as $key => $control ) {
-			$settings = $control['callback'][0]->get_settings();
+			$settings = is_object($control['callback'][0]) ? $control['callback'][0]->get_settings() : array();
 			if ( ! empty( $settings ) ) {
 				$id       = (int) preg_replace( '/[^0-9]/', '', $key );
 				$language = ( $mode === 'backend' ) ?
