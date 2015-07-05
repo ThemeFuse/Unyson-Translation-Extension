@@ -62,7 +62,7 @@ class FW_Language {
 		'jv'  => array( 'locale' => 'jv_ID', 'name' => 'Basa Jawa', 'direction' => '', ),
 		'ka'  => array( 'locale' => 'ka_GE', 'name' => 'ქართული', 'direction' => '', ),
 		'kk'  => array( 'locale' => 'kk', 'name' => 'Қазақ тілі', 'direction' => '', ),
-		'ko'  => array( 'locale' => 'ko_KR', 'name' => '한국어', e'direction' => '', ),
+		'ko'  => array( 'locale' => 'ko_KR', 'name' => '한국어', 'direction' => '', ),
 		'ku'  => array( 'locale' => 'ckb', 'name' => 'کوردی', 'direction' => 'rtl', ),
 		'lo'  => array( 'locale' => 'lo', 'name' => 'ພາສາລາວ', 'direction' => '', ),
 		'lt'  => array( 'locale' => 'lt_LT', 'name' => 'Lietuviškai', 'direction' => '', ),
