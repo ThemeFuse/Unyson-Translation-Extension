@@ -62,7 +62,7 @@ class FW_Language {
 		'jv'  => array( 'locale' => 'jv_ID', 'name' => 'Basa Jawa', 'direction' => '', ),
 		'ka'  => array( 'locale' => 'ka_GE', 'name' => 'ქართული', 'direction' => '', ),
 		'kk'  => array( 'locale' => 'kk', 'name' => 'Қазақ тілі', 'direction' => '', ),
-		'ko'  => array( 'locale' => 'ko_KR', 'name' => '한국어', 'direction' => '', ),
+		'ko'  => array( 'locale' => 'ko_KR', 'name' => '한국어', e'direction' => '', ),
 		'ku'  => array( 'locale' => 'ckb', 'name' => 'کوردی', 'direction' => 'rtl', ),
 		'lo'  => array( 'locale' => 'lo', 'name' => 'ພາສາລາວ', 'direction' => '', ),
 		'lt'  => array( 'locale' => 'lt_LT', 'name' => 'Lietuviškai', 'direction' => '', ),
@@ -100,9 +100,10 @@ class FW_Language {
 	);
 
 	/**
-	 * Set $languages array.
+	 * Set $languages array, filtered to allow changes, for example to change the locale flag of a language.
 	 */
 	function __construct() {
+		$this->languages = apply_filters('fw_ext_translation_languages', $this->languages);
 		$this->codes = array_keys( $this->languages );
 	}
 
