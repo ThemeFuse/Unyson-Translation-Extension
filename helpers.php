@@ -74,8 +74,11 @@ function fw_ext_translation_get_language_from_locale($locale){
  * Get default language.
  * @return mixed
  */
-function fw_ext_translation_get_default_language(){
-	return fw_ext_translation_get_language_from_locale(get_locale());
+function fw_ext_translation_get_default_language() {
+	$exploded            = explode( '-', get_bloginfo( 'language' ) );
+	$default_wp_language = array_shift( $exploded );
+
+	return $default_wp_language;
 }
 
 /**

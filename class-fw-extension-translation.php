@@ -630,7 +630,7 @@ class FW_Extension_Translation extends FW_Extension {
 	 * @return mixed|null
 	 */
 	public function get_default_language_code() {
-		return fw_get_db_ext_settings_option( $this->get_name(), 'default-language' );
+		return fw_get_db_ext_settings_option( $this->get_name(), 'default-language', fw_ext_translation_get_default_language() );
 	}
 
 	/**
