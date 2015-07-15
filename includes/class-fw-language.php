@@ -100,9 +100,10 @@ class FW_Language {
 	);
 
 	/**
-	 * Set $languages array.
+	 * Set $languages array, filtered to allow changes, for example to change the locale flag of a language.
 	 */
 	function __construct() {
+		$this->languages = apply_filters('fw_ext_translation_languages', $this->languages);
 		$this->codes = array_keys( $this->languages );
 	}
 
