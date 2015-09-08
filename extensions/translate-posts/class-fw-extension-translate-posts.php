@@ -154,8 +154,8 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 * Group admin filters.
 	 */
 	private function add_admin_filters() {
-		add_filter( 'manage_posts_columns', array( $this, 'generate_translation_columns' ), 10, 2 );//+
-		add_filter( 'manage_pages_columns', array( $this, 'generate_translation_columns' ), 10, 2 );//+
+		add_filter( 'manage_posts_columns', array( $this, 'generate_translation_columns' ), 10, 1 );
+		add_filter( 'manage_pages_columns', array( $this, 'generate_translation_columns' ), 10, 1 );
 		add_filter( 'get_edit_post_link', array( $this, 'change_edit_link' ), 10, 2 );//+
 		add_filter( 'parse_query', array( $this, 'filter_query_by_active_language' ) );//+
 		add_filter( 'terms_clauses', array( $this, 'change_terms_query' ) );//+
@@ -334,11 +334,10 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 	 * Generate translation columns.
 	 *
 	 * @param $columns
-	 * @param $post_type
 	 *
 	 * @return array
 	 */
-	public function generate_translation_columns( $columns, $post_type ) {
+	public function generate_translation_columns( $columns ) {
 
 		if ( ! $this->is_public_post_type() ) {
 			return $columns;
