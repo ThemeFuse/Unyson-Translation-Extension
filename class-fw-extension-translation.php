@@ -358,13 +358,23 @@ class FW_Extension_Translation extends FW_Extension {
 	}
 
 	/**
+	 * Verify if language is enabled.
+	 * @param $language
+	 *
+	 * @return bool
+	 */
+	public function language_is_enabled( $language ) {
+		return array_key_exists( $language, $this->get_enabled_languages() );
+	}
+
+	/**
 	 * Set admin active language
 	 */
 	public function set_admin_active_language() {
 		if (
 			! defined( 'DOING_AJAX' ) &&
 			! is_null( $active_lang = FW_Request::GET( 'fw_translate_to' ) ) &&
-			$this->languages_list->code_exists( $active_lang ) &&
+			$this->language_is_enabled( $active_lang ) &&
 			current_user_can( 'edit_user', $user_id = get_current_user_id() )
 		) {
 			update_user_meta( $user_id, 'fw_active_lang', $active_lang );
