@@ -22,6 +22,30 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 			$this->add_admin_filters();
 			$this->add_admin_actions();
 		}
+
+		add_filter( 'parse_query', array( $this, 'filter_post_query' ), 50 );
+
+	}
+
+	/**
+	 * Filter post query.
+	 *
+	 * @param $query
+	 *
+	 * @return mixed
+	 */
+	public function filter_post_query( $query ) {
+
+		if ( ! is_admin() && $query->is_main_query() ) {
+			$active_lang = $this->get_parent()->get_frontend_active_language();
+
+			$query->set( 'meta_key', 'translation_lang' );
+			$query->set( 'meta_value', $active_lang );
+			$query->set( 'meta_compare', '=' );
+		}
+
+
+		return $query;
 	}
 
 	/**

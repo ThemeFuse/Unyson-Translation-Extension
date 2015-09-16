@@ -674,8 +674,8 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 
 		$urls             = array();
 		$languages        = $this->get_parent()->get_enabled_languages();
-		$taxonomy         = $wp_query->queried_object->taxonomy;
-		$term_id          = $wp_query->queried_object->term_id;
+		$taxonomy         = empty( $wp_query->queried_object->taxonomy ) ? '' : $wp_query->queried_object->taxonomy;
+		$term_id          = empty( $wp_query->queried_object->term_id ) ? '' : $wp_query->queried_object->term_id;
 		$translation_id   = fw_get_term_meta( $term_id, 'translation_id', true );
 		$translated_terms = $this->query_translation( $translation_id );
 
@@ -696,7 +696,15 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 				}
 			} else {
 				//translation did not exists for this post
-				$urls[ $code ] = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $code, get_home_url( '/' ) );
+				$current_url = ( fw_current_url() === preg_replace( '/(\/fw_lang\/)(\w+)/ix', '', get_home_url() ) ) ?
+					get_home_url() :
+					fw_current_url();
+
+				if ( preg_match( '/(\/fw_lang\/)(\w+)/ix', $current_url ) ) {
+					$urls[ $code ] = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $code, $current_url );
+				} else {
+					$urls[ $code ] = untrailingslashit( $current_url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $code );
+				}
 			}
 		}
 

@@ -98,7 +98,7 @@ class FW_Extension_Translation extends FW_Extension {
 				$url = untrailingslashit( $url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $active_lang );
 			}
 		} else {
-			$url = esc_url( add_query_arg( array( $this->lang_tag => $active_lang ), $url ) );
+			$url = add_query_arg( array( $this->lang_tag => $active_lang ), $url );
 		}
 
 		return $url;
@@ -254,6 +254,9 @@ class FW_Extension_Translation extends FW_Extension {
 					$this->get_default_language_code()
 			);
 
+			//set to default language if the string is other then enabled languages.
+			$active_lang = $this->language_is_enabled( $active_lang ) ? $active_lang : $this->get_default_language_code();
+
 			setcookie( 'fw_active_lang',
 				$active_lang,
 				time() + 31536000 /* 1 year */,
@@ -359,6 +362,7 @@ class FW_Extension_Translation extends FW_Extension {
 
 	/**
 	 * Verify if language is enabled.
+	 *
 	 * @param $language
 	 *
 	 * @return bool
@@ -598,9 +602,14 @@ class FW_Extension_Translation extends FW_Extension {
 			get_home_url() :
 			fw_current_url();
 
+
 		foreach ( $languages as $lang_code => $language ) {
 			if ( $wp_rewrite->using_permalinks() ) {
-				$permalink = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, $current_url );
+				if ( preg_match( '/(\/fw_lang\/)(\w+)/ix', $current_url ) ) {
+					$permalink = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, $current_url );
+				} else {
+					$permalink = $url = untrailingslashit( $current_url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $lang_code );
+				}
 
 				$frontend_urls[ $lang_code ] = $permalink;
 			} else {
