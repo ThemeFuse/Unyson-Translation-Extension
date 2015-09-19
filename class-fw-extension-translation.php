@@ -98,7 +98,7 @@ class FW_Extension_Translation extends FW_Extension {
 				$url = untrailingslashit( $url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $active_lang );
 			}
 		} else {
-			$url = esc_url( add_query_arg( array( $this->lang_tag => $active_lang ), $url ) );
+			$url = add_query_arg( array( $this->lang_tag => $active_lang ), $url );
 		}
 
 		return $url;
@@ -254,6 +254,9 @@ class FW_Extension_Translation extends FW_Extension {
 					$this->get_default_language_code()
 			);
 
+			//set to default language if the string is other then enabled languages.
+			$active_lang = $this->language_is_enabled( $active_lang ) ? $active_lang : $this->get_default_language_code();
+
 			setcookie( 'fw_active_lang',
 				$active_lang,
 				time() + 31536000 /* 1 year */,
@@ -358,13 +361,24 @@ class FW_Extension_Translation extends FW_Extension {
 	}
 
 	/**
+	 * Verify if language is enabled.
+	 *
+	 * @param $language
+	 *
+	 * @return bool
+	 */
+	public function language_is_enabled( $language ) {
+		return array_key_exists( $language, $this->get_enabled_languages() );
+	}
+
+	/**
 	 * Set admin active language
 	 */
 	public function set_admin_active_language() {
 		if (
 			! defined( 'DOING_AJAX' ) &&
 			! is_null( $active_lang = FW_Request::GET( 'fw_translate_to' ) ) &&
-			$this->languages_list->code_exists( $active_lang ) &&
+			$this->language_is_enabled( $active_lang ) &&
 			current_user_can( 'edit_user', $user_id = get_current_user_id() )
 		) {
 			update_user_meta( $user_id, 'fw_active_lang', $active_lang );
@@ -588,9 +602,14 @@ class FW_Extension_Translation extends FW_Extension {
 			get_home_url() :
 			fw_current_url();
 
+
 		foreach ( $languages as $lang_code => $language ) {
 			if ( $wp_rewrite->using_permalinks() ) {
-				$permalink = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, $current_url );
+				if ( preg_match( '/(\/fw_lang\/)(\w+)/ix', $current_url ) ) {
+					$permalink = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $lang_code, $current_url );
+				} else {
+					$permalink = $url = untrailingslashit( $current_url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $lang_code );
+				}
 
 				$frontend_urls[ $lang_code ] = $permalink;
 			} else {
