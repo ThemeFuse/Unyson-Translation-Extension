@@ -229,7 +229,7 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 				$option                         = get_option( $option_name );
 				$option[ $parts[0] ]['fw_lang'] = $this->get_parent()->get_default_language_code();
 
-				update_option( $option_name, $option );
+				update_option( $option_name, $option, false );
 			}
 		}
 	}
