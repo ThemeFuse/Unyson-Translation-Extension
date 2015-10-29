@@ -671,6 +671,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 	 */
 	function generate_frontend_switch_urls() {
 		global $wp_query;
+		global $wp_rewrite;
 
 		$urls             = array();
 		$languages        = $this->get_parent()->get_enabled_languages();
@@ -683,7 +684,6 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 			$translation_data = $this->translation_exists( $translated_terms, $code );
 
 			if ( ! empty( $translation_data ) ) {
-				global $wp_rewrite;
 
 				$term_link = get_term_link( (int) $translation_data['term_id'], $taxonomy );
 
@@ -700,10 +700,15 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 					get_home_url() :
 					fw_current_url();
 
-				if ( preg_match( '/(\/fw_lang\/)(\w+)/ix', $current_url ) ) {
-					$urls[ $code ] = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $code, $current_url );
+				if ( $wp_rewrite->using_permalinks() ) {
+					if ( preg_match( '/(\/fw_lang\/)(\w+)/ix', $current_url ) ) {
+						$urls[ $code ] = preg_replace( '/(\/fw_lang\/)(\w+)/ix', '${1}' . $code, $current_url );
+					} else {
+						$urls[ $code ] = untrailingslashit( $current_url ) . user_trailingslashit( '/' . $this->get_parent()->lang_tag . '/' . $code );
+					}
 				} else {
-					$urls[ $code ] = untrailingslashit( $current_url ) . user_trailingslashit( '/' . $this->lang_tag . '/' . $code );
+					remove_query_arg( 'fw_lang', $current_url );
+					$urls[ $code ] = esc_url( add_query_arg( array( 'fw_lang' => $code ), $current_url ) );
 				}
 			}
 		}
