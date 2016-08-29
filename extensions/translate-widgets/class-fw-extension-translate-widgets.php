@@ -175,7 +175,7 @@ class FW_Extension_Translate_Widgets extends FW_Extension {
 		if ( 'widgets.php' === $pagenow ) {
 			$active_lang = $this->get_parent()->get_admin_active_language();
 			$pieces['join'] .= " INNER JOIN $wpdb->termmeta AS fw_tm
-								ON t.term_id = fw_tm.fw_term_id AND
+								ON t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang' AND
 								fw_tm.meta_value = '" . $active_lang . "'";
 		}

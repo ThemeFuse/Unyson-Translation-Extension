@@ -241,7 +241,7 @@ class FW_Extension_Translate_Posts extends FW_Extension {
 
 			$active_lang = FW_Request::GET( 'fw_translate_to', $this->get_parent()->get_admin_active_language() );
 			$query['join'] .= " INNER JOIN $wpdb->termmeta AS fw_tm
-								ON t.term_id = fw_tm.fw_term_id AND
+								ON t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang' AND
 								fw_tm.meta_value = '" . $active_lang . "'";
 		}

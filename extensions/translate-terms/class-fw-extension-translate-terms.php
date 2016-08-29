@@ -140,7 +140,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		) {
 			$active_lang = FW_Request::GET( 'fw_translate_to', $this->get_parent()->get_admin_active_language() );
 			$query['join'] .= " INNER JOIN $wpdb->termmeta AS fw_tm
-								ON t.term_id = fw_tm.fw_term_id AND
+								ON t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang' AND
 								fw_tm.meta_value = '" . $active_lang . "'";
 		}
@@ -169,14 +169,14 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 			) {
 				$active_lang = FW_Request::GET( 'fw_translate_to', $this->get_parent()->get_admin_active_language() );
 				$query['join'] .= " INNER JOIN $wpdb->termmeta AS fw_tm
-								ON t.term_id = fw_tm.fw_term_id AND
+								ON t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang' AND
 								fw_tm.meta_value = '" . $active_lang . "'";
 			}
 
 			if ( 'edit-tags.php' === $pagenow and ! is_null( FW_Request::get( 'fw_all_languages' ) ) ) {
 				$query['join'] .= " INNER JOIN $wpdb->termmeta AS fw_tm
-								ON t.term_id = fw_tm.fw_term_id AND
+								ON t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang'";
 				$query['where'] .= " AND fw_tm.meta_value IN ( '" . implode( "','", array_keys( $this->get_parent()->get_enabled_languages() ) ) . "' )";
 			}
@@ -199,7 +199,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 			global $wpdb;
 			$active_lang = $this->get_parent()->get_frontend_active_language();
 			$query['join'] .= " INNER JOIN $wpdb->termmeta AS fw_tm
-								ON t.term_id = fw_tm.fw_term_id AND
+								ON t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang' AND
 								fw_tm.meta_value = '" . $active_lang . "'";
 		}
@@ -357,12 +357,12 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		global $wpdb;
 
 		$sql = "SELECT
-			t1.fw_term_id as term_id,
+			t1.term_id as term_id,
 			t1.meta_value as translation_id,
 			t2.meta_value as translation_language
 			FROM  $wpdb->termmeta as t1
 				JOIN  $wpdb->termmeta as t2 ON
-				t1.fw_term_id = t2.fw_term_id AND
+				t1.term_id = t2.term_id AND
 				t2.meta_key='translation_lang'
 			WHERE t1.meta_key='translation_id'
 			AND t1.meta_value=%d";
@@ -655,7 +655,7 @@ class FW_Extension_Translate_Terms extends FW_Extension {
 		global $wpdb;
 
 		$query['where'] .= " AND NOT EXISTS (SELECT * FROM $wpdb->termmeta as fw_tm WHERE
-										t.term_id = fw_tm.fw_term_id AND
+										t.term_id = fw_tm.term_id AND
 								fw_tm.meta_key = 'translation_lang') ";
 		remove_filter( current_filter(), __FUNCTION__ );
 
