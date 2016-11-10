@@ -13,3 +13,8 @@ $manifest['display'] = true;
 $manifest['standalone'] = true;
 
 $manifest['github_update'] = 'ThemeFuse/Unyson-Translation-Extension';
+
+$manifest['github_repo'] = 'https://github.com/ThemeFuse/Unyson-Translation-Extension';
+$manifest['uri'] = 'http://manual.unyson.io/en/latest/extension/translation/index.html#content';
+$manifest['author'] = 'ThemeFuse';
+$manifest['author_uri'] = 'http://themefuse.com/';
